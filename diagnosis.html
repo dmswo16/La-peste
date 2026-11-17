@@ -1,1 +1,704 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>협력 상황 진단 · La Peste</title>
 
+  <style>
+    :root{
+      --paper:#efe4cf;
+      --paper2:#f7f0e3;
+      --ink:#201b16;
+      --muted:#6d6255;
+      --red:#9b3d31;
+      --line:#b9a98f;
+    }
+
+    *{box-sizing:border-box}
+
+    body{
+      margin:0;
+      color:var(--ink);
+      font-family:Georgia,"Times New Roman","Noto Serif KR",serif;
+      background:
+        radial-gradient(circle at 20% 10%,rgba(255,255,255,.4),transparent 28%),
+        repeating-linear-gradient(
+          0deg,
+          rgba(75,57,33,.025) 0 1px,
+          transparent 1px 4px
+        ),
+        var(--paper);
+      line-height:1.65;
+    }
+
+    a{
+      color:inherit;
+      text-decoration:none;
+    }
+
+    .wrap{
+      width:min(900px,92vw);
+      margin:auto;
+    }
+
+    header{
+      border-bottom:1px solid var(--line);
+      background:rgba(239,228,207,.95);
+      position:sticky;
+      top:0;
+      z-index:20;
+      backdrop-filter:blur(8px);
+    }
+
+    .nav{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      padding:14px 0;
+    }
+
+    .brand{
+      font-weight:700;
+      letter-spacing:.04em;
+    }
+
+    .back{
+      font-size:14px;
+      color:var(--muted);
+    }
+
+    main{
+      padding:70px 0 90px;
+    }
+
+    .eyebrow{
+      color:var(--red);
+      font-size:13px;
+      letter-spacing:.15em;
+      font-weight:700;
+      margin-bottom:8px;
+    }
+
+    h1{
+      font-size:clamp(42px,7vw,76px);
+      line-height:1.02;
+      font-weight:500;
+      margin:0 0 18px;
+    }
+
+    .intro{
+      font-size:18px;
+      color:#4d443a;
+      max-width:740px;
+      margin-bottom:36px;
+    }
+
+    .quiz-shell{
+      border:1px solid var(--line);
+      background:rgba(247,240,227,.78);
+      padding:30px;
+      min-height:480px;
+      box-shadow:0 10px 28px rgba(70,55,35,.08);
+    }
+
+    .progress{
+      height:5px;
+      background:#d6c7ae;
+      margin-bottom:28px;
+    }
+
+    .progress > div{
+      height:100%;
+      background:var(--red);
+      transition:.25s;
+    }
+
+    .qno{
+      color:var(--red);
+      font-size:13px;
+      font-weight:700;
+      letter-spacing:.12em;
+    }
+
+    .question{
+      font-size:30px;
+      line-height:1.32;
+      margin:12px 0 28px;
+    }
+
+    .answers{
+      display:grid;
+      gap:12px;
+    }
+
+    .answer{
+      width:100%;
+      text-align:left;
+      padding:17px 18px;
+      border:1px solid #a99a82;
+      background:#f6eddd;
+      cursor:pointer;
+      font-family:inherit;
+      font-size:16px;
+      line-height:1.55;
+      transition:.15s;
+    }
+
+    .answer:hover{
+      background:#fff8e9;
+      transform:translateX(4px);
+    }
+
+    .tip{
+      margin-top:20px;
+      color:var(--muted);
+      font-size:13px;
+    }
+
+    .result{
+      display:none;
+    }
+
+    .result-grid{
+      display:grid;
+      grid-template-columns:320px 1fr;
+      gap:38px;
+      align-items:start;
+    }
+
+    .result-img{
+      width:100%;
+      border:1px solid var(--line);
+      display:block;
+    }
+
+    .badge{
+      display:inline-block;
+      border:1px solid var(--red);
+      color:var(--red);
+      padding:5px 10px;
+      border-radius:999px;
+      font-size:12px;
+      letter-spacing:.08em;
+    }
+
+    .result h2{
+      font-size:40px;
+      margin:12px 0 5px;
+      font-weight:500;
+    }
+
+    .strategy{
+      color:var(--red);
+      font-size:21px;
+      margin-bottom:16px;
+    }
+
+    .actions{
+      background:#e5d7bf;
+      padding:20px;
+      margin-top:20px;
+    }
+
+    .actions b{
+      display:block;
+      margin-bottom:8px;
+    }
+
+    .scorebars{
+      display:grid;
+      gap:10px;
+      margin:22px 0;
+    }
+
+    .scoreline{
+      display:grid;
+      grid-template-columns:100px 1fr 34px;
+      gap:10px;
+      align-items:center;
+      font-size:14px;
+    }
+
+    .track{
+      height:8px;
+      background:#d8cbb5;
+      border-radius:999px;
+      overflow:hidden;
+    }
+
+    .fill{
+      height:100%;
+      background:var(--red);
+    }
+
+    .btn{
+      display:inline-block;
+      margin-top:16px;
+      border:1px solid var(--ink);
+      background:transparent;
+      padding:12px 20px;
+      border-radius:999px;
+      font-family:inherit;
+      font-weight:700;
+      cursor:pointer;
+    }
+
+    footer{
+      border-top:1px solid var(--line);
+      padding:28px 0 45px;
+      color:var(--muted);
+      font-size:13px;
+    }
+
+    @media(max-width:760px){
+      .result-grid{
+        grid-template-columns:1fr;
+      }
+
+      .result-img{
+        max-width:360px;
+      }
+
+      .question{
+        font-size:25px;
+      }
+
+      .quiz-shell{
+        padding:22px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <div class="wrap nav">
+    <div class="brand">LA PESTE · DIAGNOSTIC</div>
+    <a class="back" href="index.html">← 연구 페이지로 돌아가기</a>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+
+    <div class="eyebrow">COOPERATION DIAGNOSIS</div>
+    <h1>지금 우리 공동체에는<br>어떤 전략이 필요할까?</h1>
+
+    <p class="intro">
+      아래 문항은 성격을 진단하는 검사가 아닙니다.
+      현재 당신이 속한 공동체의 협력 상황을 가장 가깝게 선택하면,
+      『페스트』의 네 인물이 보여준 행동 방식 중 지금 가장 필요한 전략을 제안합니다.
+    </p>
+
+    <div id="quiz" class="quiz-shell">
+      <div class="progress">
+        <div id="progressBar"></div>
+      </div>
+
+      <div class="qno" id="qno"></div>
+      <div class="question" id="question"></div>
+      <div class="answers" id="answers"></div>
+
+      <div class="tip">
+        가장 바람직한 답이 아니라, 현재 실제 상황에 가장 가까운 답을 선택해 주세요.
+      </div>
+    </div>
+
+    <div id="result" class="quiz-shell result"></div>
+
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">
+    『페스트』를 통해 본 공동체 협력의 조건 · 상황 기반 진단
+  </div>
+</footer>
+
+
+<script>
+
+const personas = {
+
+  rieux:{
+    name:"베르나르 리외",
+    label:"책임·역할 명확화 전략",
+    img:"assets/rieux.jpg",
+
+    desc:
+      "현재 공동체에는 거창한 독려보다 누가 무엇을 맡고 어디까지 책임질 것인지 명확하게 정하는 것이 가장 필요합니다.",
+
+    actions:[
+      "담당자와 역할 범위를 분명하게 정하기",
+      "각 역할의 완료 기준과 연락 창구를 정하기",
+      "특정 개인의 희생보다 각자의 기본 책임을 확인하기"
+    ],
+
+    survey:
+      "설문에서는 응답자의 약 67%가 ‘명확한 역할과 규칙’을 지속적인 협력의 중요한 조건으로 선택했습니다."
+  },
+
+
+  tarrou:{
+    name:"장 타루",
+    label:"연대·조직화 전략",
+    img:"assets/tarrou.jpg",
+
+    desc:
+      "좋은 의견과 참여 의지는 존재하지만 실제 행동으로 연결되지 않는 상황에 가깝습니다. 흩어진 참여 의사를 조직적인 협력으로 연결할 필요가 있습니다.",
+
+    actions:[
+      "참여자를 작은 팀으로 나누고 조정자를 정하기",
+      "도움 의사를 실제 업무와 바로 연결할 참여 경로 만들기",
+      "공유 문서나 공통 채널을 만들어 진행 상황을 함께 확인하기"
+    ],
+
+    survey:
+      "설문에서도 자발적인 참여 의지만큼 역할 분담과 실제 행동을 연결하는 구조가 중요하게 나타났습니다."
+  },
+
+
+  grand:{
+    name:"조제프 그랑",
+    label:"지속·공정성 전략",
+    img:"assets/grand.jpg",
+
+    desc:
+      "협력은 이미 이루어지고 있지만 특정 사람에게 부담이 몰리거나 시간이 지나면서 참여가 지속되기 어려운 상황입니다.",
+
+    actions:[
+      "힘든 역할을 여러 사람이 번갈아 맡기",
+      "업무량과 활동 시간을 확인해 부담 차이를 줄이기",
+      "큰 역할을 작은 단위로 나누어 오래 참여할 수 있게 만들기"
+    ],
+
+    survey:
+      "설문에서 불공정한 부담이 존재하는 상황의 지속 참여 의향은 평균 3.23점으로 비교적 낮게 나타났습니다."
+  },
+
+
+  rambert:{
+    name:"레이몽 랑베르",
+    label:"신뢰·동기 회복 전략",
+    img:"assets/rambert.jpg",
+
+    desc:
+      "규칙이나 역할은 존재하지만 구성원들이 서로의 참여를 믿지 못하거나 ‘왜 나만 해야 하지?’라는 생각이 커지는 상황입니다.",
+
+    actions:[
+      "구성원별 참여 현황과 진행 상황을 투명하게 공유하기",
+      "각자의 상황과 어려움을 설명할 기회를 만들기",
+      "개인의 행동이 공동체의 목표와 어떻게 연결되는지 보여주기"
+    ],
+
+    survey:
+      "설문에서는 약 58%가 구성원 간 상호신뢰를 지속적인 협력의 핵심 조건으로 선택했습니다."
+  }
+
+};
+
+
+
+const questions = [
+
+  {
+    q:"현재 당신이 속한 공동체의 상황은 무엇에 가장 가깝나요?",
+    a:[
+      ["사람들이 의견은 많이 내지만 실제 행동으로 잘 이어지지 않는다.","tarrou",4],
+      ["일은 진행되고 있지만 누가 무엇을 맡아야 하는지 자주 혼란스럽다.","rieux",4],
+      ["항상 비슷한 몇 명이 대부분의 일을 맡는다.","grand",4],
+      ["규칙은 있지만 구성원들이 서로를 믿지 못한다.","rambert",4]
+    ]
+  },
+
+
+  {
+    q:"협력이 잘 이루어지지 않는 가장 큰 이유는 무엇이라고 느끼나요?",
+    a:[
+      ["담당자와 역할이 명확하지 않다.","rieux",3],
+      ["참여하고 싶어도 실제로 어떻게 참여해야 할지 모르겠다.","tarrou",3],
+      ["참여하는 사람에게 부담이 지나치게 집중된다.","grand",3],
+      ["다른 구성원들이 제대로 참여할 것이라는 확신이 없다.","rambert",3]
+    ]
+  },
+
+
+  {
+    q:"회의나 단체 채팅방에서는 어떤 모습이 가장 자주 나타나나요?",
+    a:[
+      ["해야 할 일은 나오지만 담당자가 잘 정해지지 않는다.","rieux",2],
+      ["좋은 의견은 많은데 이후 실제 행동이 거의 없다.","tarrou",3],
+      ["몇 명만 계속 일을 맡고 나머지는 참여가 적다.","grand",3],
+      ["누가 얼마나 참여하는지를 두고 불만이나 의심이 생긴다.","rambert",3]
+    ]
+  },
+
+
+  {
+    q:"시간이 지날수록 가장 걱정되는 문제는 무엇인가요?",
+    a:[
+      ["업무가 겹치거나 필요한 일이 빠지는 것","rieux",2],
+      ["처음의 참여 의지가 사라지고 행동으로 이어지지 않는 것","tarrou",2],
+      ["적극적인 사람들이 지쳐서 더 이상 참여하지 않는 것","grand",3],
+      ["서로에 대한 불신이 커져 참여 의욕이 줄어드는 것","rambert",3]
+    ]
+  },
+
+
+  {
+    q:"현재 가장 필요한 변화는 무엇이라고 생각하나요?",
+    a:[
+      ["각자의 역할과 책임을 명확하게 정하는 것","rieux",3],
+      ["참여 의사를 실제 행동으로 연결할 조직과 구조를 만드는 것","tarrou",3],
+      ["부담을 공정하게 나누고 오래 참여할 수 있게 만드는 것","grand",3],
+      ["참여 현황과 정보를 투명하게 공유해 신뢰를 회복하는 것","rambert",3]
+    ]
+  },
+
+
+  {
+    q:"구성원들이 ‘왜 내가 해야 하지?’라고 말하기 시작한다면, 가장 가까운 원인은 무엇인가요?",
+    a:[
+      ["자신이 맡은 책임이 무엇인지 분명하지 않기 때문이다.","rieux",2],
+      ["혼자 행동한다고 느껴지고 함께 움직이는 구조가 없기 때문이다.","tarrou",2],
+      ["특정 사람에게 일이 너무 많이 몰려 있기 때문이다.","grand",2],
+      ["다른 사람들도 제대로 참여하는지 믿을 수 없기 때문이다.","rambert",2]
+    ]
+  }
+
+];
+
+
+
+let idx = 0;
+
+let scores = {
+  rieux:0,
+  tarrou:0,
+  grand:0,
+  rambert:0
+};
+
+
+const qno = document.getElementById("qno");
+const question = document.getElementById("question");
+const answers = document.getElementById("answers");
+const progressBar = document.getElementById("progressBar");
+
+
+
+function renderQuestion(){
+
+  const data = questions[idx];
+
+  qno.textContent =
+    `QUESTION ${idx+1} / ${questions.length}`;
+
+  question.textContent = data.q;
+
+  progressBar.style.width =
+    `${(idx/questions.length)*100}%`;
+
+  answers.innerHTML = "";
+
+
+  data.a.forEach(([text,key,value])=>{
+
+    const button = document.createElement("button");
+
+    button.className = "answer";
+    button.textContent = text;
+
+    button.onclick = ()=>{
+
+      scores[key] += value;
+
+      idx++;
+
+      if(idx < questions.length){
+
+        renderQuestion();
+
+      }else{
+
+        showResult();
+
+      }
+
+    };
+
+    answers.appendChild(button);
+
+  });
+
+}
+
+
+
+function showResult(){
+
+  document.getElementById("quiz").style.display = "none";
+
+  const result =
+    document.getElementById("result");
+
+  result.style.display = "block";
+
+
+  const sorted =
+    Object.entries(scores)
+      .sort((a,b)=>b[1]-a[1]);
+
+
+  const winner = sorted[0][0];
+
+  const person = personas[winner];
+
+
+  const labels = {
+    rieux:"역할·책임",
+    tarrou:"연대·행동",
+    grand:"지속·공정",
+    rambert:"신뢰·동기"
+  };
+
+
+  const maximum =
+    Math.max(...Object.values(scores),1);
+
+
+  const bars =
+    Object.entries(scores)
+      .map(([key,value])=>`
+
+      <div class="scoreline">
+
+        <span>${labels[key]}</span>
+
+        <div class="track">
+          <div
+            class="fill"
+            style="width:${Math.round(value/maximum*100)}%">
+          </div>
+        </div>
+
+        <b>${value}</b>
+
+      </div>
+
+      `)
+      .join("");
+
+
+  result.innerHTML = `
+
+  <div class="result-grid">
+
+    <div>
+      <img
+        class="result-img"
+        src="${person.img}"
+        alt="${person.name}">
+    </div>
+
+
+    <div>
+
+      <span class="badge">
+        현재 공동체에 필요한 전략
+      </span>
+
+      <h2>${person.name}</h2>
+
+      <div class="strategy">
+        ${person.label}
+      </div>
+
+      <p>${person.desc}</p>
+
+
+      <div class="scorebars">
+        ${bars}
+      </div>
+
+
+      <div class="actions">
+
+        <b>지금 해볼 행동</b>
+
+        <ol>
+
+          ${person.actions
+            .map(action=>`<li>${action}</li>`)
+            .join("")}
+
+        </ol>
+
+      </div>
+
+
+      <p
+        style="
+        font-size:14px;
+        color:var(--muted);
+        margin-top:18px;
+        ">
+
+        <b>설문조사와 연결</b>
+        · ${person.survey}
+
+      </p>
+
+
+      <button
+        class="btn"
+        onclick="restart()">
+
+        다시 진단하기
+
+      </button>
+
+    </div>
+
+  </div>
+
+  `;
+
+
+  window.scrollTo({
+    top:result.offsetTop-80,
+    behavior:"smooth"
+  });
+
+}
+
+
+
+function restart(){
+
+  idx = 0;
+
+  scores = {
+    rieux:0,
+    tarrou:0,
+    grand:0,
+    rambert:0
+  };
+
+  document.getElementById("result").style.display = "none";
+  document.getElementById("quiz").style.display = "block";
+
+  renderQuestion();
+
+}
+
+
+
+renderQuestion();
+
+</script>
+
+</body>
+</html>
